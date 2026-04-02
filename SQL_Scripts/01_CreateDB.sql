@@ -16,3 +16,13 @@ CREATE TABLE IF NOT EXISTS Transaktion (
     SpezialFeld TEXT,  -- Für 'IstSteuerlichAbsetzbar' oder 'EinnahmeQuelle'
     FOREIGN KEY(KategorieId) REFERENCES Kategorie(Id)
 );
+
+-- Diese View berechnet automatisch die Summe aller Beträge pro Kategorie
+CREATE VIEW IF NOT EXISTS v_KategorieSummen AS
+SELECT 
+    k.Name AS KategorieName, 
+    SUM(t.Betrag) AS TotalBetrag,
+    COUNT(t.Id) AS AnzahlTransaktionen
+FROM Kategorie k
+LEFT JOIN Transaktion t ON k.Id = t.KategorieId
+GROUP BY k.Id, k.Name;
