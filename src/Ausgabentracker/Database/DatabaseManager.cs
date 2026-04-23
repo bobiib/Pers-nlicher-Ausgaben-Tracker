@@ -2,7 +2,7 @@ using Microsoft.Data.Sqlite;
 using System;
 using System.IO;
 
-namespace AusgabenTracker.Database
+namespace Ausgabentracker.Database
 {
     public class DatabaseManager
     {
@@ -20,7 +20,7 @@ namespace AusgabenTracker.Database
             get
             {
                 if (_instance == null)
-                {
+                {   
                     _instance = new DatabaseManager();
                 }
                 return _instance;

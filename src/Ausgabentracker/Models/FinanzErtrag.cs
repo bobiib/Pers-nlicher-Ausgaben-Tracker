@@ -1,6 +1,6 @@
 using System;
 
-namespace AusgabenTracker.Models
+namespace Ausgabentracker.Models
 {
     public abstract class FinanzEintrag : ITransaktion
     {

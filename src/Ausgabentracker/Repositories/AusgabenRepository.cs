@@ -1,10 +1,10 @@
-using AusgabenTracker.Database;
-using AusgabenTracker.Models;
+using Ausgabentracker.Database;
+using Ausgabentracker.Models;
 using Microsoft.Data.Sqlite;
 using System;
 using System.Collections.Generic;
 
-namespace AusgabenTracker.Repositories
+namespace Ausgabentracker.Repositories
 {
     public class AusgabenRepository
     {

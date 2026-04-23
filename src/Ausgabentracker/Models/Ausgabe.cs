@@ -1,4 +1,4 @@
-namespace AusgabenTracker.Models
+namespace Ausgabentracker.Models
 {
     public class Ausgabe : FinanzEintrag
     {
