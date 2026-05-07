@@ -1,4 +1,4 @@
-﻿using Ausgabentracker.Database; 
+﻿using Ausgabentracker.Database; // Das wichtige kleine "t"
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.IO;
 
@@ -22,7 +22,7 @@ namespace Ausgabentracker.Tests
             }
 
             // 2. Act (Ausführung)
-            // Wir rufen eure Singleton-Verbindung auf (Das ist Fabios Code!)
+            // Wir rufen eure Singleton-Verbindung auf 
             DatabaseManager.Instance.InitializeDatabase();
 
             // 3. Assert (Überprüfung)

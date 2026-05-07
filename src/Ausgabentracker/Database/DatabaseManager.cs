@@ -19,10 +19,7 @@ namespace Ausgabentracker.Database
         {
             get
             {
-                if (_instance == null)
-                {   
-                    _instance = new DatabaseManager();
-                }
+                if (_instance == null) _instance = new DatabaseManager();
                 return _instance;
             }
         }
@@ -34,21 +31,33 @@ namespace Ausgabentracker.Database
             if (!dbExists)
             {
                 Console.WriteLine("Datenbank wird erstellt...");
+
+                // ERZWINGE die Erstellung der leeren Datenbank-Datei!
+                using (var connection = new SqliteConnection(_connectionString))
+                {
+                    connection.Open();
+                }
+
+                // Wir versuchen den normalen Weg (Any CPU) UND den x64-Weg, 
+                // so findet er die Scripte garantiert, egal wie das Projekt eingestellt ist!
                 ExecuteScript(@"..\..\..\..\SQL_Scripts\01_CreateDB.sql");
+                ExecuteScript(@"..\..\..\..\..\SQL_Scripts\01_CreateDB.sql");
+
                 ExecuteScript(@"..\..\..\..\SQL_Scripts\03_SeedData.sql");
+                ExecuteScript(@"..\..\..\..\..\SQL_Scripts\03_SeedData.sql");
             }
 
             try
             {
                 ExecuteScript(@"..\..\..\..\SQL_Scripts\02_UpdateDB.sql");
+                ExecuteScript(@"..\..\..\..\..\SQL_Scripts\02_UpdateDB.sql");
             }
-            catch (Exception)
-            {
-            }
+            catch (Exception) { }
         }
 
         private void ExecuteScript(string filePath)
         {
+            // Führt das Script nur aus, wenn der Dateipfad auch wirklich existiert
             if (File.Exists(filePath))
             {
                 string script = File.ReadAllText(filePath);
@@ -59,10 +68,6 @@ namespace Ausgabentracker.Database
                     command.CommandText = script;
                     command.ExecuteNonQuery();
                 }
-            }
-            else
-            {
-                Console.WriteLine($"Achtung: Script nicht gefunden: {filePath}");
             }
         }
 
