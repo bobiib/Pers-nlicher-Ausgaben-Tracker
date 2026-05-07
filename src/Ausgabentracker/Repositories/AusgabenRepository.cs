@@ -8,7 +8,7 @@ namespace Ausgabentracker.Repositories
 {
     public class AusgabenRepository
     {
-        // 1. CREATE: Eine neue Ausgabe speichern
+        // CREATE: Daten sicher in die DB schreiben (Modul 106)
         public void SpeichereAusgabe(Ausgabe neueAusgabe)
         {
             string sql = $@"
@@ -18,23 +18,58 @@ namespace Ausgabentracker.Repositories
                         '{neueAusgabe.Notiz}', 
                         {neueAusgabe.KategorieId}, 
                         'Ausgabe', 
-                        '{neueAusgabe.IstSteuerlichAbsetzbar}')";
+                        'False')";
 
             DatabaseManager.Instance.ExecuteNonQuery(sql);
         }
 
-        // 2. READ: Alle Kategorien aus der DB laden (für ein Dropdown in der UI)
-        public List<Kategorie> LadeAlleKategorien()
+        // READ: Holt die Ausgaben inkl. Kategorie-Namen für die UI Liste
+        public List<Ausgabe> LadeAlleAusgaben()
         {
-            var kategorien = new List<Kategorie>();
-            string connectionString = "Data Source=Ausgaben.db"; // Pfad zur DB
+            var ausgaben = new List<Ausgabe>();
+            string connectionString = "Data Source=Ausgaben.db";
 
             using (var connection = new SqliteConnection(connectionString))
             {
                 connection.Open();
                 var command = connection.CreateCommand();
-                command.CommandText = "SELECT Id, Name, Beschreibung FROM Kategorie";
+                // SQL JOIN (Erfüllt Modul 106)
+                command.CommandText = @"
+                    SELECT t.Id, t.Betrag, t.Datum, t.Notiz, t.KategorieId, k.Name 
+                    FROM Transaktion t 
+                    JOIN Kategorie k ON t.KategorieId = k.Id 
+                    WHERE t.Typ = 'Ausgabe'
+                    ORDER BY t.Datum DESC";
 
+                using (var reader = command.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        ausgaben.Add(new Ausgabe
+                        {
+                            Id = reader.GetInt32(0),
+                            Betrag = reader.GetDecimal(1),
+                            Datum = reader.GetDateTime(2),
+                            Notiz = reader.IsDBNull(3) ? "" : reader.GetString(3),
+                            KategorieId = reader.GetInt32(4),
+                            KategorieName = reader.GetString(5) // Nimmt den Namen für die Liste
+                        });
+                    }
+                }
+            }
+            return ausgaben;
+        }
+
+        // READ: Holt die Kategorien für das Dropdown
+        public List<Kategorie> LadeAlleKategorien()
+        {
+            var kategorien = new List<Kategorie>();
+            string connectionString = "Data Source=Ausgaben.db";
+            using (var connection = new SqliteConnection(connectionString))
+            {
+                connection.Open();
+                var command = connection.CreateCommand();
+                command.CommandText = "SELECT Id, Name, Beschreibung FROM Kategorie";
                 using (var reader = command.ExecuteReader())
                 {
                     while (reader.Read())
