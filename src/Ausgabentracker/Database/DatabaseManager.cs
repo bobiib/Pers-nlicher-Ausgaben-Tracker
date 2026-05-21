@@ -36,23 +36,21 @@ namespace Ausgabentracker.Database
                 {
                     connection.Open();
                 }
-                ExecuteScript(@"..\..\..\..\SQL_Scripts\01_CreateDB.sql");
-                ExecuteScript(@"..\..\..\..\..\SQL_Scripts\01_CreateDB.sql");
-
-                ExecuteScript(@"..\..\..\..\SQL_Scripts\03_SeedData.sql");
-                ExecuteScript(@"..\..\..\..\..\SQL_Scripts\03_SeedData.sql");
+                ExecuteScript("01_CreateDB.sql");
+                ExecuteScript("03_SeedData.sql");
             }
 
             try
             {
-                ExecuteScript(@"..\..\..\..\SQL_Scripts\02_UpdateDB.sql");
-                ExecuteScript(@"..\..\..\..\..\SQL_Scripts\02_UpdateDB.sql");
+                ExecuteScript("02_UpdateDB.sql");
             }
             catch (Exception) { }
         }
 
-        private void ExecuteScript(string filePath)
+        private void ExecuteScript(string fileName)
         {
+            string filePath = FindScriptPath(fileName);
+
             if (File.Exists(filePath))
             {
                 string script = File.ReadAllText(filePath);
@@ -63,7 +61,38 @@ namespace Ausgabentracker.Database
                     command.CommandText = script;
                     command.ExecuteNonQuery();
                 }
+                return;
             }
+
+            throw new FileNotFoundException($"SQL-Script wurde nicht gefunden: {fileName}", fileName);
+        }
+
+        private string FindScriptPath(string fileName)
+        {
+            string[] startDirectories =
+            {
+                AppDomain.CurrentDomain.BaseDirectory,
+                Environment.CurrentDirectory,
+                Directory.GetCurrentDirectory()
+            };
+
+            foreach (string startDirectory in startDirectories)
+            {
+                var directory = new DirectoryInfo(startDirectory);
+
+                while (directory != null)
+                {
+                    string scriptPath = Path.Combine(directory.FullName, "SQL_Scripts", fileName);
+                    if (File.Exists(scriptPath))
+                    {
+                        return scriptPath;
+                    }
+
+                    directory = directory.Parent;
+                }
+            }
+
+            return null;
         }
 
         public int ExecuteNonQuery(string sql)

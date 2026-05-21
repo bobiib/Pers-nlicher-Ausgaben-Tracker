@@ -1,4 +1,5 @@
 ﻿using Ausgabentracker.Database; 
+using Microsoft.Data.Sqlite;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.IO;
@@ -6,21 +7,33 @@ using System.IO;
 namespace Ausgabentracker.Tests
 {
     [TestClass]
+    [DoNotParallelize]
     public class DatenbankTests
     {
-        [TestMethod]
-        public void Teste_Ob_Datenbank_Erstellt_Wird()
-        {
-            string dbPfad = "Ausgaben.db";
+        private const string DbPfad = "Ausgaben.db";
 
-            if (File.Exists(dbPfad))
+        [TestInitialize]
+        public void TestInitialisieren()
+        {
+            DatenbankNeuErstellen();
+        }
+
+        private static void DatenbankNeuErstellen()
+        {
+            SqliteConnection.ClearAllPools();
+
+            if (File.Exists(DbPfad))
             {
-                File.Delete(dbPfad);
+                File.Delete(DbPfad);
             }
 
             DatabaseManager.Instance.InitializeDatabase();
+        }
 
-            bool existiert = File.Exists(dbPfad);
+        [TestMethod]
+        public void Teste_Ob_Datenbank_Erstellt_Wird()
+        {
+            bool existiert = File.Exists(DbPfad);
 
             Assert.IsTrue(existiert, "FEHLER: Die Datenbankdatei wurde nicht erstellt! Überprüfe die SQL-Scripte.");
         }
