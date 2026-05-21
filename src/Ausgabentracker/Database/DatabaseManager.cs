@@ -32,14 +32,10 @@ namespace Ausgabentracker.Database
             {
                 Console.WriteLine("Datenbank wird erstellt...");
 
-                // ERZWINGE die Erstellung der leeren Datenbank-Datei!
                 using (var connection = new SqliteConnection(_connectionString))
                 {
                     connection.Open();
                 }
-
-                // Wir versuchen den normalen Weg (Any CPU) UND den x64-Weg, 
-                // so findet er die Scripte garantiert, egal wie das Projekt eingestellt ist!
                 ExecuteScript(@"..\..\..\..\SQL_Scripts\01_CreateDB.sql");
                 ExecuteScript(@"..\..\..\..\..\SQL_Scripts\01_CreateDB.sql");
 
@@ -57,7 +53,6 @@ namespace Ausgabentracker.Database
 
         private void ExecuteScript(string filePath)
         {
-            // Führt das Script nur aus, wenn der Dateipfad auch wirklich existiert
             if (File.Exists(filePath))
             {
                 string script = File.ReadAllText(filePath);

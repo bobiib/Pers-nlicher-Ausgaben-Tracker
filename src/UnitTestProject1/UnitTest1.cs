@@ -1,5 +1,6 @@
-﻿using Ausgabentracker.Database; // Das wichtige kleine "t"
+﻿using Ausgabentracker.Database; 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
 using System.IO;
 
 namespace Ausgabentracker.Tests
@@ -10,23 +11,15 @@ namespace Ausgabentracker.Tests
         [TestMethod]
         public void Teste_Ob_Datenbank_Erstellt_Wird()
         {
-            // 1. Arrange (Vorbereitung)
-            // Wir prüfen, wo die Datenbank liegen sollte
             string dbPfad = "Ausgaben.db";
 
-            // Wenn es eine alte Test-Datenbank gibt, löschen wir sie vorher,
-            // damit der Test wirklich beweist, dass sie NEU erstellt wird.
             if (File.Exists(dbPfad))
             {
                 File.Delete(dbPfad);
             }
 
-            // 2. Act (Ausführung)
-            // Wir rufen eure Singleton-Verbindung auf 
             DatabaseManager.Instance.InitializeDatabase();
 
-            // 3. Assert (Überprüfung)
-            // Wir behaupten: "Die Datei MUSS jetzt existieren!"
             bool existiert = File.Exists(dbPfad);
 
             Assert.IsTrue(existiert, "FEHLER: Die Datenbankdatei wurde nicht erstellt! Überprüfe die SQL-Scripte.");
@@ -35,12 +28,56 @@ namespace Ausgabentracker.Tests
         [TestMethod]
         public void Teste_Singleton_Instanz()
         {
-            // Testet die Anforderung aus Modul 320: Singleton Pattern
             var instanz1 = DatabaseManager.Instance;
             var instanz2 = DatabaseManager.Instance;
 
-            // Beide Instanzen müssen im Arbeitsspeicher absolut identisch sein
             Assert.AreSame(instanz1, instanz2, "FEHLER: Das Singleton Pattern funktioniert nicht richtig!");
+        }
+
+        [TestMethod]
+        public void Teste_Ob_Ausgabe_Gespeichert_Wird()
+        {
+            var repo = new Ausgabentracker.Repositories.AusgabenRepository();
+            var neueAusgabe = new Ausgabentracker.Models.Ausgabe
+            {
+                Betrag = 99.95m,
+                Datum = System.DateTime.Now,
+                Notiz = "Unit Test Ausgabe",
+                KategorieId = 1
+            };
+
+            repo.SpeichereAusgabe(neueAusgabe);
+            var alleAusgaben = repo.LadeAlleAusgaben();
+
+            bool gefunden = false;
+            foreach (var a in alleAusgaben)
+            {
+                if (a.Notiz == "Unit Test Ausgabe" && a.Betrag == 99.95m)
+                {
+                    gefunden = true;
+                    break;
+                }
+            }
+
+            Assert.IsTrue(gefunden, "FEHLER: Die gespeicherte Ausgabe wurde nicht in der Datenbank gefunden!");
+        }
+
+        [TestMethod]
+        public void Teste_Ob_Loeschen_Funktioniert()
+        {
+            var repo = new Ausgabentracker.Repositories.AusgabenRepository();
+            var a = new Ausgabentracker.Models.Ausgabe { Betrag = 5m, Datum = DateTime.Now, Notiz = "DeleteTest", KategorieId = 1 };
+            repo.SpeichereAusgabe(a);
+
+            var liste = repo.LadeAlleAusgaben();
+            var zuLoeschen = liste.Find(x => x.Notiz == "DeleteTest");
+
+            repo.LoescheAusgabe(zuLoeschen.Id);
+
+            var listeDanach = repo.LadeAlleAusgaben();
+            bool existiertNoch = listeDanach.Exists(x => x.Id == zuLoeschen.Id);
+
+            Assert.IsFalse(existiertNoch, "Fehler: Eintrag wurde nicht gelöscht!");
         }
     }
 }
