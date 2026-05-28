@@ -359,4 +359,53 @@ namespace Ausgabentracker
             btnAbbrechen.Visibility = Visibility.Collapsed;
         }
     }
+
+    public class MonthGroupSummaryConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            var group = value as CollectionViewGroup;
+            if (group == null) return "";
+
+            var transaktionen = GetTransaktionen(group).ToList();
+            decimal einnahmen = transaktionen.OfType<Einnahme>().Sum(t => t.Betrag);
+            decimal ausgaben = transaktionen.OfType<Ausgabe>().Sum(t => t.Betrag);
+            decimal saldo = einnahmen - ausgaben;
+
+            return string.Format(
+                culture,
+                "Einnahmen {0:N2} CHF   Ausgaben {1:N2} CHF   Saldo {2:+0.00;-0.00;0.00} CHF",
+                einnahmen,
+                ausgaben,
+                saldo);
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotSupportedException();
+        }
+
+        private static IEnumerable<FinanzEintrag> GetTransaktionen(CollectionViewGroup group)
+        {
+            foreach (object item in group.Items)
+            {
+                var subgroup = item as CollectionViewGroup;
+                if (subgroup != null)
+                {
+                    foreach (var transaktion in GetTransaktionen(subgroup))
+                    {
+                        yield return transaktion;
+                    }
+
+                    continue;
+                }
+
+                var transaktionItem = item as FinanzEintrag;
+                if (transaktionItem != null)
+                {
+                    yield return transaktionItem;
+                }
+            }
+        }
+    }
 }
