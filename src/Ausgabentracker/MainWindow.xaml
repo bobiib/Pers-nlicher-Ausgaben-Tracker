@@ -373,7 +373,6 @@
                                        Style="{StaticResource SectionTitle}"
                                        VerticalAlignment="Center"/>
                             <TextBlock DockPanel.Dock="Right"
-                                       Text="Nach Monat gruppiert"
                                        Foreground="{StaticResource MutedTextBrush}"
                                        VerticalAlignment="Center"/>
                         </DockPanel>
