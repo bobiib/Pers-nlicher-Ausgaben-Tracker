@@ -92,5 +92,68 @@ namespace Ausgabentracker.Tests
 
             Assert.IsFalse(existiertNoch, "Fehler: Eintrag wurde nicht gelöscht!");
         }
+
+        [TestMethod]
+        public void Teste_Ob_Ausgabe_Bearbeitet_Wird()
+        {
+            var repo = new Ausgabentracker.Repositories.AusgabenRepository();
+            var ausgabe = new Ausgabentracker.Models.Ausgabe
+            {
+                Betrag = 12m,
+                Datum = DateTime.Now,
+                Notiz = "Vor Bearbeitung",
+                KategorieId = 1
+            };
+
+            repo.SpeichereAusgabe(ausgabe);
+            var gespeichert = repo.LadeAlleAusgaben().Find(x => x.Notiz == "Vor Bearbeitung");
+
+            gespeichert.Betrag = 42.50m;
+            gespeichert.Notiz = "Nach Bearbeitung";
+            gespeichert.KategorieId = 2;
+
+            repo.AktualisiereAusgabe(gespeichert);
+
+            var bearbeitet = repo.LadeAlleAusgaben().Find(x => x.Id == gespeichert.Id);
+
+            Assert.AreEqual(42.50m, bearbeitet.Betrag, "FEHLER: Der Betrag wurde nicht aktualisiert!");
+            Assert.AreEqual("Nach Bearbeitung", bearbeitet.Notiz, "FEHLER: Die Notiz wurde nicht aktualisiert!");
+            Assert.AreEqual(2, bearbeitet.KategorieId, "FEHLER: Die Kategorie wurde nicht aktualisiert!");
+        }
+
+        [TestMethod]
+        public void Teste_Ob_Einnahme_Gespeichert_Wird()
+        {
+            var repo = new Ausgabentracker.Repositories.AusgabenRepository();
+            var einnahme = new Ausgabentracker.Models.Einnahme
+            {
+                Betrag = 2500m,
+                Datum = DateTime.Now,
+                Notiz = "Lohn",
+                KategorieId = 4,
+                EinnahmeQuelle = "Arbeit"
+            };
+
+            repo.SpeichereEinnahme(einnahme);
+
+            var transaktionen = repo.LadeAlleTransaktionen();
+            var gespeichert = transaktionen.Find(x => x.Notiz == "Lohn");
+
+            Assert.IsNotNull(gespeichert, "FEHLER: Die Einnahme wurde nicht gespeichert!");
+            Assert.AreEqual("Einnahme", gespeichert.Typ, "FEHLER: Die Transaktion wurde nicht als Einnahme gespeichert!");
+            Assert.AreEqual(2500m, gespeichert.BerechneBetrag(), "FEHLER: Einnahmen müssen positiv gerechnet werden!");
+        }
+
+        [TestMethod]
+        public void Teste_Ob_Saldo_Berechnet_Wird()
+        {
+            var repo = new Ausgabentracker.Repositories.AusgabenRepository();
+            repo.SpeichereEinnahme(new Ausgabentracker.Models.Einnahme { Betrag = 100m, Datum = DateTime.Now, Notiz = "Einnahme", KategorieId = 4 });
+            repo.SpeichereAusgabe(new Ausgabentracker.Models.Ausgabe { Betrag = 35m, Datum = DateTime.Now, Notiz = "Ausgabe", KategorieId = 1 });
+
+            Assert.AreEqual(100m, repo.LadeGesamtEinnahmen(), "FEHLER: Einnahmen-Summe stimmt nicht!");
+            Assert.AreEqual(35m, repo.LadeGesamtAusgaben(), "FEHLER: Ausgaben-Summe stimmt nicht!");
+            Assert.AreEqual(65m, repo.LadeSaldo(), "FEHLER: Saldo stimmt nicht!");
+        }
     }
 }

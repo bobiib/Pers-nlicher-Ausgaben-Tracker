@@ -3,6 +3,7 @@ namespace Ausgabentracker.Models
     public class Einnahme : FinanzEintrag
     {
         public string EinnahmeQuelle { get; set; }
+        public override string Typ { get { return "Einnahme"; } }
 
         public override string ZeigeZusammenfassung()
         {
