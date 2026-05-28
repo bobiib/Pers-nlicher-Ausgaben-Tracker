@@ -9,7 +9,7 @@
     <RootNamespace>Ausgabentracker</RootNamespace>
     <AssemblyName>Ausgabentracker</AssemblyName>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
-    <RuntimeIdentifiers>win-x64</RuntimeIdentifiers>
+    <RuntimeIdentifiers>win;win-x64</RuntimeIdentifiers>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <WarningLevel>4</WarningLevel>
@@ -128,9 +128,6 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Data.Sqlite">
       <Version>10.0.7</Version>
-    </PackageReference>
-    <PackageReference Include="SourceGear.sqlite3">
-      <Version>3.50.4.5</Version>
     </PackageReference>
     <PackageReference Include="SQLitePCLRaw.bundle_e_sqlite3">
       <Version>2.1.11</Version>
