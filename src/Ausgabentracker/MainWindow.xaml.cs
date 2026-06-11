@@ -19,6 +19,10 @@ namespace Ausgabentracker
         private const string SpreadsheetNamespace = "urn:schemas-microsoft-com:office:spreadsheet";
         private AusgabenRepository _repo = new AusgabenRepository();
         private FinanzEintrag _transaktionInBearbeitung;
+        private Kategorie _kategorieInBearbeitung;
+        private List<FinanzEintrag> _alleTransaktionen = new List<FinanzEintrag>();
+        private List<Kategorie> _alleKategorien = new List<Kategorie>();
+        private bool _filterWerdenAktualisiert;
 
         public MainWindow()
         {
@@ -31,19 +35,92 @@ namespace Ausgabentracker
         {
             try
             {
-                cmbKategorie.ItemsSource = _repo.LadeAlleKategorien();
-                if (cmbKategorie.Items.Count > 0 && cmbKategorie.SelectedIndex == -1) cmbKategorie.SelectedIndex = 0;
+                int? ausgewaehlteKategorieId = cmbKategorie.SelectedValue as int?;
+                int? filterKategorieId = cmbFilterKategorie.SelectedValue as int?;
+                string filterMonat = cmbFilterMonat.SelectedItem as string;
 
-                ICollectionView transaktionen = CollectionViewSource.GetDefaultView(_repo.LadeAlleTransaktionen());
-                transaktionen.GroupDescriptions.Clear();
-                transaktionen.GroupDescriptions.Add(new PropertyGroupDescription("MonatGruppe"));
-                lstAusgaben.ItemsSource = transaktionen;
+                _alleKategorien = _repo.LadeAlleKategorien();
+                _alleTransaktionen = _repo.LadeAlleTransaktionen();
+
+                cmbKategorie.ItemsSource = _alleKategorien;
+                lstKategorien.ItemsSource = _alleKategorien;
+                WaehleKategorieAus(ausgewaehlteKategorieId);
+                AktualisiereFilter(filterKategorieId, filterMonat);
+                WendeFilterAn();
 
                 lblGesamtEinnahmen.Text = _repo.LadeGesamtEinnahmen().ToString("N2") + " CHF";
                 lblGesamtAusgaben.Text = _repo.LadeGesamtAusgaben().ToString("N2") + " CHF";
                 lblSaldo.Text = _repo.LadeSaldo().ToString("N2") + " CHF";
             }
             catch (Exception ex) { MessageBox.Show(ex.Message); }
+        }
+
+        private void WaehleKategorieAus(int? kategorieId)
+        {
+            if (_alleKategorien.Count == 0) return;
+
+            if (kategorieId.HasValue && _alleKategorien.Any(k => k.Id == kategorieId.Value))
+            {
+                cmbKategorie.SelectedValue = kategorieId.Value;
+                return;
+            }
+
+            if (cmbKategorie.SelectedIndex == -1)
+            {
+                cmbKategorie.SelectedIndex = 0;
+            }
+        }
+
+        private void AktualisiereFilter(int? filterKategorieId, string filterMonat)
+        {
+            _filterWerdenAktualisiert = true;
+
+            var filterKategorien = new List<Kategorie> { new Kategorie { Id = 0, Name = "Alle Kategorien" } };
+            filterKategorien.AddRange(_alleKategorien);
+            cmbFilterKategorie.ItemsSource = filterKategorien;
+            cmbFilterKategorie.SelectedValue = filterKategorieId.HasValue && filterKategorien.Any(k => k.Id == filterKategorieId.Value)
+                ? filterKategorieId.Value
+                : 0;
+
+            var monate = new List<string> { "Alle Monate" };
+            monate.AddRange(_alleTransaktionen.Select(t => t.MonatGruppe).Distinct());
+            cmbFilterMonat.ItemsSource = monate;
+            cmbFilterMonat.SelectedItem = !string.IsNullOrEmpty(filterMonat) && monate.Contains(filterMonat)
+                ? filterMonat
+                : "Alle Monate";
+
+            _filterWerdenAktualisiert = false;
+        }
+
+        private void WendeFilterAn()
+        {
+            IEnumerable<FinanzEintrag> gefilterteTransaktionen = _alleTransaktionen;
+
+            int kategorieId = cmbFilterKategorie.SelectedValue is int ? (int)cmbFilterKategorie.SelectedValue : 0;
+            if (kategorieId > 0)
+            {
+                gefilterteTransaktionen = gefilterteTransaktionen.Where(t => t.KategorieId == kategorieId);
+            }
+
+            string monat = cmbFilterMonat.SelectedItem as string;
+            if (!string.IsNullOrEmpty(monat) && monat != "Alle Monate")
+            {
+                gefilterteTransaktionen = gefilterteTransaktionen.Where(t => t.MonatGruppe == monat);
+            }
+
+            ICollectionView transaktionen = CollectionViewSource.GetDefaultView(gefilterteTransaktionen.ToList());
+            transaktionen.GroupDescriptions.Clear();
+            transaktionen.GroupDescriptions.Add(new PropertyGroupDescription("MonatGruppe"));
+            lstAusgaben.ItemsSource = transaktionen;
+        }
+
+        private void KategorieFormularZuruecksetzen()
+        {
+            _kategorieInBearbeitung = null;
+            txtKategorieName.Text = "";
+            txtKategorieBeschreibung.Text = "";
+            lstKategorien.SelectedItem = null;
+            btnKategorieSpeichern.Content = "Kategorie speichern";
         }
 
         private void BtnSpeichern_Click(object sender, RoutedEventArgs e)
@@ -98,6 +175,116 @@ namespace Ausgabentracker
                 FormularZuruecksetzen();
                 RefreshAll();
             }
+        }
+
+        private void BtnBeispieldaten_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                int eingefuegt = _repo.FuegeBeispieldatenEin();
+                RefreshAll();
+                MessageBox.Show(
+                    eingefuegt > 0
+                        ? $"{eingefuegt} Beispieltransaktionen wurden eingefügt."
+                        : "Die Beispieldaten sind bereits vorhanden.",
+                    "Beispieldaten",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Beispieldaten konnten nicht eingefügt werden: " + ex.Message, "Beispieldaten", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void Filter_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (_filterWerdenAktualisiert) return;
+            WendeFilterAn();
+        }
+
+        private void BtnFilterZuruecksetzen_Click(object sender, RoutedEventArgs e)
+        {
+            cmbFilterKategorie.SelectedValue = 0;
+            cmbFilterMonat.SelectedItem = "Alle Monate";
+            WendeFilterAn();
+        }
+
+        private void BtnKategorieSpeichern_Click(object sender, RoutedEventArgs e)
+        {
+            string name = txtKategorieName.Text.Trim();
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                MessageBox.Show("Bitte einen Kategorienamen eingeben.");
+                return;
+            }
+
+            try
+            {
+                if (_kategorieInBearbeitung == null)
+                {
+                    _repo.SpeichereKategorie(new Kategorie
+                    {
+                        Name = name,
+                        Beschreibung = txtKategorieBeschreibung.Text.Trim()
+                    });
+                }
+                else
+                {
+                    _kategorieInBearbeitung.Name = name;
+                    _kategorieInBearbeitung.Beschreibung = txtKategorieBeschreibung.Text.Trim();
+                    _repo.AktualisiereKategorie(_kategorieInBearbeitung);
+                }
+
+                KategorieFormularZuruecksetzen();
+                RefreshAll();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Kategorie konnte nicht gespeichert werden: " + ex.Message);
+            }
+        }
+
+        private void BtnKategorieNeu_Click(object sender, RoutedEventArgs e)
+        {
+            KategorieFormularZuruecksetzen();
+        }
+
+        private void BtnKategorieLoeschen_Click(object sender, RoutedEventArgs e)
+        {
+            var selected = lstKategorien.SelectedItem as Kategorie;
+            if (selected == null)
+            {
+                MessageBox.Show("Bitte eine Kategorie auswählen.");
+                return;
+            }
+
+            if (MessageBox.Show("Kategorie wirklich löschen?", "Bestätigen", MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes)
+            {
+                return;
+            }
+
+            try
+            {
+                _repo.LoescheKategorie(selected.Id);
+                KategorieFormularZuruecksetzen();
+                RefreshAll();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Kategorie löschen", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+        }
+
+        private void LstKategorien_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            var selected = lstKategorien.SelectedItem as Kategorie;
+            if (selected == null) return;
+
+            _kategorieInBearbeitung = selected;
+            txtKategorieName.Text = selected.Name;
+            txtKategorieBeschreibung.Text = selected.Beschreibung;
+            btnKategorieSpeichern.Content = "Kategorie ändern";
         }
 
         private void BtnExportExcel_Click(object sender, RoutedEventArgs e)

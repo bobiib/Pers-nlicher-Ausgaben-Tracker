@@ -2,6 +2,7 @@ using Ausgabentracker.Models;
 using Microsoft.Data.Sqlite;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Ausgabentracker.Repositories
 {
@@ -167,6 +168,77 @@ namespace Ausgabentracker.Repositories
             return kategorien;
         }
 
+        public void SpeichereKategorie(Kategorie kategorie)
+        {
+            using (var connection = new SqliteConnection(connectionString))
+            {
+                connection.Open();
+                var command = connection.CreateCommand();
+                command.CommandText = @"
+                    INSERT INTO Kategorie (Name, Beschreibung)
+                    VALUES ($name, $beschreibung)";
+                command.Parameters.AddWithValue("$name", kategorie.Name);
+                command.Parameters.AddWithValue("$beschreibung", kategorie.Beschreibung ?? "");
+                command.ExecuteNonQuery();
+            }
+        }
+
+        public void AktualisiereKategorie(Kategorie kategorie)
+        {
+            using (var connection = new SqliteConnection(connectionString))
+            {
+                connection.Open();
+                var command = connection.CreateCommand();
+                command.CommandText = @"
+                    UPDATE Kategorie
+                    SET Name = $name,
+                        Beschreibung = $beschreibung
+                    WHERE Id = $id";
+                command.Parameters.AddWithValue("$name", kategorie.Name);
+                command.Parameters.AddWithValue("$beschreibung", kategorie.Beschreibung ?? "");
+                command.Parameters.AddWithValue("$id", kategorie.Id);
+                command.ExecuteNonQuery();
+            }
+        }
+
+        public void LoescheKategorie(int id)
+        {
+            using (var connection = new SqliteConnection(connectionString))
+            {
+                connection.Open();
+                var pruefen = connection.CreateCommand();
+                pruefen.CommandText = "SELECT COUNT(*) FROM Transaktion WHERE KategorieId = $id";
+                pruefen.Parameters.AddWithValue("$id", id);
+                long verwendet = (long)pruefen.ExecuteScalar();
+                if (verwendet > 0)
+                {
+                    throw new InvalidOperationException("Diese Kategorie wird noch von Transaktionen verwendet und kann nicht gelöscht werden.");
+                }
+
+                var command = connection.CreateCommand();
+                command.CommandText = "DELETE FROM Kategorie WHERE Id = $id";
+                command.Parameters.AddWithValue("$id", id);
+                command.ExecuteNonQuery();
+            }
+        }
+
+        public int FuegeBeispieldatenEin()
+        {
+            int eingefuegt = 0;
+            var kategorien = LadeAlleKategorien();
+            int lebensmittelId = KategorieIdErmittelnOderAnlegen(kategorien, "Lebensmittel", "Einkäufe im Supermarkt");
+            int wohnenId = KategorieIdErmittelnOderAnlegen(kategorien, "Wohnen", "Miete, Strom, Internet");
+            int freizeitId = KategorieIdErmittelnOderAnlegen(kategorien, "Freizeit", "Kino, Ausgang, Hobbys");
+            int gehaltId = KategorieIdErmittelnOderAnlegen(kategorien, "Gehalt", "Monatlicher Lohn");
+
+            if (SpeichereBeispielWennNeu(new Einnahme { Betrag = 4200m, Datum = DateTime.Today.AddDays(-10), Notiz = "Beispiel: Monatslohn", KategorieId = gehaltId, EinnahmeQuelle = "Arbeit" })) eingefuegt++;
+            if (SpeichereBeispielWennNeu(new Ausgabe { Betrag = 185.40m, Datum = DateTime.Today.AddDays(-8), Notiz = "Beispiel: Wocheneinkauf", KategorieId = lebensmittelId })) eingefuegt++;
+            if (SpeichereBeispielWennNeu(new Ausgabe { Betrag = 1450m, Datum = DateTime.Today.AddDays(-6), Notiz = "Beispiel: Miete", KategorieId = wohnenId })) eingefuegt++;
+            if (SpeichereBeispielWennNeu(new Ausgabe { Betrag = 64.90m, Datum = DateTime.Today.AddDays(-3), Notiz = "Beispiel: Kino und Essen", KategorieId = freizeitId })) eingefuegt++;
+
+            return eingefuegt;
+        }
+
         public void LoescheAusgabe(int id)
         {
             LoescheTransaktion(id);
@@ -215,6 +287,46 @@ namespace Ausgabentracker.Repositories
                 var result = command.ExecuteScalar();
                 return (result != null && result != DBNull.Value) ? Convert.ToDecimal(result) : 0;
             }
+        }
+
+        private int KategorieIdErmittelnOderAnlegen(List<Kategorie> kategorien, string name, string beschreibung)
+        {
+            var vorhandeneKategorie = kategorien.FirstOrDefault(k => string.Equals(k.Name, name, StringComparison.OrdinalIgnoreCase));
+            if (vorhandeneKategorie != null)
+            {
+                return vorhandeneKategorie.Id;
+            }
+
+            SpeichereKategorie(new Kategorie { Name = name, Beschreibung = beschreibung });
+            var neueKategorie = LadeAlleKategorien().First(k => string.Equals(k.Name, name, StringComparison.OrdinalIgnoreCase));
+            kategorien.Add(neueKategorie);
+            return neueKategorie.Id;
+        }
+
+        private bool SpeichereBeispielWennNeu(FinanzEintrag transaktion)
+        {
+            using (var connection = new SqliteConnection(connectionString))
+            {
+                connection.Open();
+                var pruefen = connection.CreateCommand();
+                pruefen.CommandText = "SELECT COUNT(*) FROM Transaktion WHERE Notiz = $notiz";
+                pruefen.Parameters.AddWithValue("$notiz", transaktion.Notiz);
+                long vorhanden = (long)pruefen.ExecuteScalar();
+                if (vorhanden > 0)
+                {
+                    return false;
+                }
+            }
+
+            var einnahme = transaktion as Einnahme;
+            if (einnahme != null)
+            {
+                SpeichereEinnahme(einnahme);
+                return true;
+            }
+
+            SpeichereAusgabe((Ausgabe)transaktion);
+            return true;
         }
     }
 }
