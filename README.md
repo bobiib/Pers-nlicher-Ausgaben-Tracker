@@ -145,15 +145,15 @@ Die Datenbank besteht hauptsächlich aus zwei Tabellen:
 - `Kategorie`
 - `Transaktion`
 
-Eine Kategorie kann mehrere Transaktionen besitzen. Jede Transaktion kann einer Kategorie zugeordnet werden.
+Eine Kategorie kann mehrere Transaktionen besitzen. Jede Transaktion kann einer Kategorie zugeordnet werden. Die folgenden Diagramme wurden auf den aktuellen Projektstand angepasst und zeigen die Tabellen, Schlüssel, Beziehungen und die View `v_KategorieSummen`.
 
 ![Code: SQLite-Schema](docs/images/code-sql-schema.png)
 
-Das relationale Modell sieht so aus:
+Das aktuelle relationale Modell sieht so aus:
 
 ![Relationales Datenbankmodell](Datenbankstruktur/Relationales%20Datenbankmodell.png)
 
-Das ER-Modell zeigt dieselbe Idee auf konzeptioneller Ebene:
+Das aktuelle ER-Modell zeigt dieselbe Idee auf konzeptioneller Ebene:
 
 ![ER-Diagramm](Datenbankstruktur/ER-Diagramm_PersoenlicherAusgabenTracker.drawio.png)
 
@@ -265,7 +265,7 @@ Der Export ist nützlich, wenn Daten außerhalb der Anwendung weiterverarbeitet 
 
 ## Softwaredesign
 
-Das UML-Klassendiagramm dokumentiert die wichtigsten Klassen und Beziehungen:
+Das UML-Klassendiagramm dokumentiert die wichtigsten aktuellen Klassen und Beziehungen der Anwendung. Es zeigt unter anderem `MainWindow`, `AusgabenRepository`, `DatabaseManager`, die OOP-Modelle, das Interface und den Converter für die Monatsauswertung:
 
 ![UML-Klassendiagramm](Softwaredesign/UML%20Klassendiagramm.png)
 
