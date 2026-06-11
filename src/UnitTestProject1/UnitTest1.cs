@@ -155,5 +155,49 @@ namespace Ausgabentracker.Tests
             Assert.AreEqual(35m, repo.LadeGesamtAusgaben(), "FEHLER: Ausgaben-Summe stimmt nicht!");
             Assert.AreEqual(65m, repo.LadeSaldo(), "FEHLER: Saldo stimmt nicht!");
         }
+
+        [TestMethod]
+        public void Teste_Ob_Kategorie_CRUD_Funktioniert()
+        {
+            var repo = new Ausgabentracker.Repositories.AusgabenRepository();
+            var kategorie = new Ausgabentracker.Models.Kategorie
+            {
+                Name = "TestKategorie",
+                Beschreibung = "Vor Bearbeitung"
+            };
+
+            repo.SpeichereKategorie(kategorie);
+            var gespeichert = repo.LadeAlleKategorien().Find(k => k.Name == "TestKategorie");
+
+            Assert.IsNotNull(gespeichert, "FEHLER: Die Kategorie wurde nicht gespeichert!");
+
+            gespeichert.Name = "TestKategorieBearbeitet";
+            gespeichert.Beschreibung = "Nach Bearbeitung";
+            repo.AktualisiereKategorie(gespeichert);
+
+            var bearbeitet = repo.LadeAlleKategorien().Find(k => k.Id == gespeichert.Id);
+            Assert.AreEqual("TestKategorieBearbeitet", bearbeitet.Name, "FEHLER: Der Kategoriename wurde nicht aktualisiert!");
+            Assert.AreEqual("Nach Bearbeitung", bearbeitet.Beschreibung, "FEHLER: Die Beschreibung wurde nicht aktualisiert!");
+
+            repo.LoescheKategorie(bearbeitet.Id);
+            var geloescht = repo.LadeAlleKategorien().Find(k => k.Id == bearbeitet.Id);
+
+            Assert.IsNull(geloescht, "FEHLER: Die Kategorie wurde nicht gelöscht!");
+        }
+
+        [TestMethod]
+        public void Teste_Ob_Beispieldaten_Eingefuegt_Werden()
+        {
+            var repo = new Ausgabentracker.Repositories.AusgabenRepository();
+
+            int eingefuegt = repo.FuegeBeispieldatenEin();
+            int erneutEingefuegt = repo.FuegeBeispieldatenEin();
+            var transaktionen = repo.LadeAlleTransaktionen();
+
+            Assert.AreEqual(4, eingefuegt, "FEHLER: Es sollten vier Beispieltransaktionen eingefügt werden!");
+            Assert.AreEqual(0, erneutEingefuegt, "FEHLER: Beispieldaten dürfen nicht doppelt eingefügt werden!");
+            Assert.IsTrue(transaktionen.Exists(t => t.Notiz == "Beispiel: Monatslohn"), "FEHLER: Beispiel-Einnahme fehlt!");
+            Assert.IsTrue(transaktionen.Exists(t => t.Notiz == "Beispiel: Miete"), "FEHLER: Beispiel-Ausgabe fehlt!");
+        }
     }
 }
