@@ -12,6 +12,12 @@ namespace Ausgabentracker.Models
         }
 
 
+        public override string GetBeschreibung()
+        {
+            string steuer = IstSteuerlichAbsetzbar ? " [Steuerabzug]" : "";
+            return $"{Datum.ToShortDateString()}: Ausgabe{steuer} - {Notiz} (-{Betrag} CHF)";
+        }
+
         public override decimal BerechneBetrag()
         {
             return -Betrag;

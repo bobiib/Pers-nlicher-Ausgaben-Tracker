@@ -1,4 +1,5 @@
 using Ausgabentracker.Models;
+using Ausgabentracker.Database;
 using Microsoft.Data.Sqlite;
 using System;
 using System.Collections.Generic;
@@ -8,7 +9,7 @@ namespace Ausgabentracker.Repositories
 {
     public class AusgabenRepository
     {
-        private string connectionString = "Data Source=Ausgaben.db";
+        private string connectionString => DatabaseManager.Instance.ConnectionString;
 
         public void SpeichereAusgabe(Ausgabe neueAusgabe)
         {
@@ -327,6 +328,30 @@ namespace Ausgabentracker.Repositories
 
             SpeichereAusgabe((Ausgabe)transaktion);
             return true;
+        }
+
+        public List<KategorieSumme> LadeKategorieSummen()
+        {
+            var list = new List<KategorieSumme>();
+            using (var connection = new SqliteConnection(connectionString))
+            {
+                connection.Open();
+                var command = connection.CreateCommand();
+                command.CommandText = "SELECT KategorieName, TotalBetrag, AnzahlTransaktionen FROM v_KategorieSummen";
+                using (var reader = command.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        list.Add(new KategorieSumme
+                        {
+                            KategorieName = reader.GetString(0),
+                            TotalBetrag = reader.IsDBNull(1) ? 0 : reader.GetDecimal(1),
+                            AnzahlTransaktionen = reader.GetInt32(2)
+                        });
+                    }
+                }
+            }
+            return list;
         }
     }
 }

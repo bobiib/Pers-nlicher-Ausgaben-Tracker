@@ -24,6 +24,8 @@ namespace Ausgabentracker.Database
             }
         }
 
+        public string ConnectionString => _connectionString;
+
         public void InitializeDatabase()
         {
             bool dbExists = File.Exists(_dbFilePath);

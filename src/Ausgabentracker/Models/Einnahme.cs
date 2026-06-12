@@ -10,6 +10,11 @@ namespace Ausgabentracker.Models
             return $"EINNAHME von {EinnahmeQuelle}: +{Betrag} CHF";
         }
 
+        public override string GetBeschreibung()
+        {
+            return $"{Datum.ToShortDateString()}: Einnahme aus {EinnahmeQuelle} - {Notiz} (+{Betrag} CHF)";
+        }
+
         public override decimal BerechneBetrag()
         {
             return Betrag;

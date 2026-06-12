@@ -47,72 +47,38 @@ Die Software soll:
 - Git-Verwaltung
 - Video und Präsentation
 
-## Zeitplanung
+## Zeitplanung & Detaillierter Semesterplan (17 Lerneinheiten)
 
-### Phase 1: Analyse und Datenmodell
+Die Zusammenarbeit erfolgt an insgesamt 17 Donnerstagvormittagen zu je 2 Lektionen (insgesamt 34 Lektionen), ergänzt durch individuelle Arbeiten ausserhalb des Unterrichts.
 
-**Zeitraum:** Ende Februar bis Anfang März
+| Datum | Lektionen (Donnerstag) | Geplante Aktivitäten / Meilensteine | Relevante Modul-Zuordnungen & Prüfungen |
+| :--- | :--- | :--- | :--- |
+| **29.01.2026** | Lektion 1 & 2 | Semesterstart, Kick-Off, Teambildung, Git-Repository & Projekt-Setup | Allgemeine Bestimmungen |
+| **05.02.2026** | Lektion 3 & 4 | Definition der funktionalen Anforderungen, Features und Anwendungsziele | Modul 319 (Applikationen entwerfen) |
+| **12.02.2026** | Lektion 5 & 6 | Modellierung der Datenbank: Konzeptionelles ER-Modell | Modul 162 (Daten modellieren) |
+| **19.02.2026** | Lektion 7 & 8 | Ableitung des relationalen Datenbankmodells aus dem ER-Modell | Modul 162 (Daten modellieren) |
+| **26.02.2026** | Lektion 9 & 10 | Abschluss Datenmodellierung & **Refresher Test Modul 162** | **Refresher Test Modul 162** |
+| **05.03.2026** | Lektion 11 & 12 | Softwaredesign: Erstellung des UML-Klassendiagramms (OOP-Struktur) | Modul 320 (Objektorientiert Programmieren) |
+| **12.03.2026** | Lektion 13 & 14 | Entwurf des Programmablaufplans (PAP) mittels PAPDesigner | Modul 319 (Applikationen implementieren) |
+| **19.03.2026** | Lektion 15 & 16 | Erstellung von SQL-Create-/Seed-Skripten & **Refresher Test Modul 164** | **Refresher Test Modul 164** / Modul 164 |
+| **26.03.2026** | Lektion 17 & 18 | Implementierung der Singleton-Datenbankverbindung und des Schema-Updates | Modul 164 / Modul 320 |
+| **02.04.2026** | Lektion 19 & 20 | Repository-Entwurf und C#-Verbindungsaufbau zu SQLite | Modul 164 / Modul 106 |
+| **09.04.2026** | Lektion 21 & 22 | OOP-Modellierung: Implementierung abstrakter Klassen und Vererbung | Modul 320 (Objektorientiert Programmieren) |
+| **16.04.2026** | Lektion 23 & 24 | Polymorphie: Interface-Methoden und deren runtime-spezifische Overrides | Modul 320 (Objektorientiert Programmieren) |
+| **23.04.2026** | Lektion 25 & 26 | Start WPF-UI & **Refresher Test Modul 319** | **Refresher Test Modul 319** |
+| **30.04.2026** | Lektion 27 & 28 | UI-Entwicklung: Datenbindung (Binding) und CRUD-Schnittstellen | Modul 319 / Modul 106 |
+| **07.05.2026** | Lektion 29 & 30 | Validierung von Benutzereingaben, Fehlerbehandlung und Excel-Export | Modul 106 / Allgemein |
+| **14.05.2026** | Lektion 31 & 32 | Qualitätssicherung: Schreiben von Unit-Tests für CRUD & Geschäftslogik | Modul 106 / Modul 320 (Tests) |
+| **21.05.2026** | Lektion 33 & 34 | Finalisierung der C#-Anwendung & **Refresher Test Modul 320** | **Refresher Test Modul 320** |
 
-- Projektidee und Anforderungen definieren
-- Funktionsumfang festlegen
-- Datenobjekte bestimmen
-- ER-Modell erstellen
-- relationales Modell erstellen
-- Dokumentation im Repository festhalten
+## Semester-Abschlusstermine
 
-### Phase 2: Softwaredesign
+- **Freitag, 12.06.2026 23:59 Uhr:** Abgabetermin (Quellcode & Markdown-Dokumentation vollständig im Git-Repository)
+- **Samstag & Sonntag, 13. + 14. Juni 2026:** Projektkorrektur durch die Lehrkraft
+- **Donnerstag, 18.06.2026:** Projektbesprechung
+- **Donnerstag, 25.06.2026 & 02.07.2026:** Projektpräsentationen (Vorführung des 7-minütigen Videos und Fragerunde)
+- **Donnerstag, 02.07.2026:** Modulende
 
-**Zeitraum:** Anfang März bis Mitte März
-
-- Softwarearchitektur festlegen
-- Klassenstruktur planen
-- UML-Klassendiagramm erstellen
-- Programmablaufplan erstellen
-- OOP-Konzepte planen
-
-### Phase 3: Datenbank und Infrastruktur
-
-**Zeitraum:** Mitte März bis Ende April
-
-- SQLite integrieren
-- Datenbankerstellung automatisieren
-- Update-Mechanismus implementieren
-- Script für Beispieldaten erstellen
-- Benutzerfunktion für Beispieldaten umsetzen
-- Singleton-Datenbankverbindung umsetzen
-- Methoden für Datenbankzugriffe implementieren
-
-### Phase 4: Implementierung der Anwendung
-
-**Zeitraum:** Ende April bis Ende Mai
-
-- Datenklassen implementieren
-- Geschäftslogik entwickeln
-- CRUD-Funktionalität für Transaktionen umsetzen
-- CRUD-Funktionalität für Kategorien umsetzen
-- Filterung nach Monat und Kategorie umsetzen
-- Validierung implementieren
-- Benutzeroberfläche erstellen
-- OOP-Anforderungen umsetzen
-
-### Phase 5: Testphase und Abschluss
-
-**Zeitraum:** Ende Mai bis Abgabe
-
-- Unit-Tests erstellen
-- Datenbankfunktionalitäten testen
-- Fehlerbehandlung verbessern
-- Dokumentation abschliessen
-- Präsentationsvideo erstellen
-- Anwendung stabilisieren
-
-## Meilensteine
-
-- Datenmodell abgeschlossen: Anfang März 2026
-- Softwaredesign abgeschlossen: Mitte März 2026
-- Datenbank funktionsfähig: Ende April 2026
-- Anwendung vollständig implementiert: Ende Mai 2026
-- Projektabgabe: 12. Juni 2026
 
 ## Arbeitsorganisation
 

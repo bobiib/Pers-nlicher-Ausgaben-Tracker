@@ -1,4 +1,4 @@
-﻿using Ausgabentracker.Database; 
+using Ausgabentracker.Database; 
 using Microsoft.Data.Sqlite;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
@@ -198,6 +198,39 @@ namespace Ausgabentracker.Tests
             Assert.AreEqual(0, erneutEingefuegt, "FEHLER: Beispieldaten dürfen nicht doppelt eingefügt werden!");
             Assert.IsTrue(transaktionen.Exists(t => t.Notiz == "Beispiel: Monatslohn"), "FEHLER: Beispiel-Einnahme fehlt!");
             Assert.IsTrue(transaktionen.Exists(t => t.Notiz == "Beispiel: Miete"), "FEHLER: Beispiel-Ausgabe fehlt!");
+        }
+
+        [TestMethod]
+        public void Teste_Datenbank_View_KategorieSummen()
+        {
+            var repo = new Ausgabentracker.Repositories.AusgabenRepository();
+            repo.SpeichereEinnahme(new Ausgabentracker.Models.Einnahme { Betrag = 500m, Datum = DateTime.Now, Notiz = "Lohn Test", KategorieId = 4 });
+            repo.SpeichereAusgabe(new Ausgabentracker.Models.Ausgabe { Betrag = 50m, Datum = DateTime.Now, Notiz = "Ausgabe Test", KategorieId = 1 });
+
+            var summen = repo.LadeKategorieSummen();
+            var lohnSumme = summen.Find(s => s.KategorieName == "Gehalt");
+            var essenSumme = summen.Find(s => s.KategorieName == "Lebensmittel");
+
+            Assert.IsNotNull(lohnSumme);
+            Assert.AreEqual(500m, lohnSumme.TotalBetrag);
+            Assert.AreEqual(1, lohnSumme.AnzahlTransaktionen);
+
+            Assert.IsNotNull(essenSumme);
+            Assert.AreEqual(50m, essenSumme.TotalBetrag); // SQLite stores amounts as positive numbers
+            Assert.AreEqual(1, essenSumme.AnzahlTransaktionen);
+        }
+
+        [TestMethod]
+        public void Teste_Polymorphie_Interface_Methoden()
+        {
+            Ausgabentracker.Models.ITransaktion einnahme = new Ausgabentracker.Models.Einnahme { Betrag = 200m, Datum = new DateTime(2026, 6, 1), Notiz = "Geschenk", EinnahmeQuelle = "Familie" };
+            Ausgabentracker.Models.ITransaktion ausgabe = new Ausgabentracker.Models.Ausgabe { Betrag = 50m, Datum = new DateTime(2026, 6, 2), Notiz = "Kino", IstSteuerlichAbsetzbar = false };
+
+            Assert.AreEqual(200m, einnahme.BerechneBetrag());
+            Assert.AreEqual(-50m, ausgabe.BerechneBetrag());
+
+            Assert.IsTrue(einnahme.GetBeschreibung().Contains("Einnahme aus Familie"));
+            Assert.IsTrue(ausgabe.GetBeschreibung().Contains("Ausgabe - Kino"));
         }
     }
 }

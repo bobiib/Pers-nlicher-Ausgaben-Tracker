@@ -100,6 +100,7 @@
     <Compile Include="Models\FinanzErtrag.cs" />
     <Compile Include="Models\ITransaction.cs" />
     <Compile Include="Models\Kategorie.cs" />
+    <Compile Include="Models\KategorieSumme.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
