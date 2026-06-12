@@ -6,7 +6,8 @@ Das Projekt wurde im Rahmen der Module 162, 164, 106, 319 und 320 umgesetzt. Es 
 
 ## 🎥 Projektpräsentation (Video)
 
-https://github.com/bobiib/Pers-nlicher-Ausgaben-Tracker/raw/main/docs/videos/Projektpraesentation.mp4
+
+https://github.com/user-attachments/assets/9d95d7f1-993b-4e7d-9da6-9884e478e395
 
 ---
 
