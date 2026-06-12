@@ -334,6 +334,13 @@ Fehlgeschlagen: 0
 
 ## Starten des Projekts
 
+### 🚀 Direktstart (Ohne Compilierung & NuGet-Wiederherstellung)
+Wer die Anwendung einfach nur ausführen möchte, ohne Visual Studio zu installieren:
+1. Laden Sie die Datei `Ausgabentracker_v1.0.zip` aus den **Releases** des GitHub-Repositories herunter.
+2. Entpacken Sie den ZIP-Ordner vollständig an einen beliebigen Ort auf Ihrem PC.
+3. Starten Sie die Anwendung per Doppelklick auf die Datei **`Ausgabentracker.exe`**.
+
+### 🛠️ Entwickler-Setup (Kompilierung aus Quellcode)
 Voraussetzungen:
 
 - Windows
