@@ -4,6 +4,12 @@ Der **Persönliche Ausgaben-Tracker** ist eine Desktop-Anwendung in C# und WPF. 
 
 Das Projekt wurde im Rahmen der Module 162, 164, 106, 319 und 320 umgesetzt. Es verbindet Datenmodellierung, Datenbankzugriff, objektorientierte Programmierung, Benutzeroberfläche, CRUD-Funktionen, Validierung und Unit-Tests in einer vollständigen Anwendung.
 
+## 🎥 Projektpräsentation (Video)
+
+https://github.com/bobiib/Pers-nlicher-Ausgaben-Tracker/releases/download/V1.0/Projektprasentation.mp4
+
+---
+
 ![Programmübersicht](docs/images/app-uebersicht.png)
 
 ## Ziel der Anwendung
